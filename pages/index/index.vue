@@ -1,21 +1,24 @@
 <template>
 	<view class="container">
 		<view class="viewContent">
-			<Task v-if="tabs[0].path === activeTabPath"></Task>
-			<Order v-if="tabs[1].path === activeTabPath"></Order>
-			<My v-if="tabs[2].path === activeTabPath"></My>
+			<Task v-if="tabs[0].path === tabbar"></Task>
+			<!-- <Order v-if="tabs[1].path === tabbar"></Order> -->
+			<My v-if="tabs[1].path === tabbar"></My>
 		</view>
-		<view class="tabContainer">
-			<tabBar :tabs="tabs" @change="onChangeTabar" />
-		</view>
+		<wd-tabbar fixed v-model="tabbar" @change="onTabarChange" bordered safeAreaInsetBottom placeholder>
+		  <wd-tabbar-item v-for="tab in tabs" :name="tab.path" :title="tab.title" :icon="tab.icon"></wd-tabbar-item>
+		</wd-tabbar>
 	</view>
 </template>
 
 <script>
+	import { ref } from 'vue'
 	import Task from '@/pages/task';
 	import Order from '@/pages/order';
 	import My from '@/pages/my';
 	
+	const tabbar = ref(null);
+
 	export default {
 		components: {
 			Task,
@@ -27,42 +30,33 @@
 				tabs: [
 					{
 						title: '兼职广场',
-						icon: 'navigate',
+						icon: 'chart-bubble',
 						path: 'pages/task/index'
 					},
-					{
-						title: '订单',
-						icon: 'list',
-						path: 'pages/order/index'
-					},
+					// {
+					// 	title: '订单',
+					// 	icon: 'list',
+					// 	path: 'pages/order/index'
+					// },
 					{
 						title: '我的',
-						icon: 'person-filled',
+						icon: 'user',
 						path: 'pages/my/index'
 					}
 				],
-				activeTabPath: 'pages/task/index',
+				tabbar: 'pages/task/index'
 			}
 		},
 		methods: {
-			onChangeTabar(tab) {
-				this.activeTabPath = tab?.path;
+			onTabarChange(e) {
+				tabbar.value = e.value;
 			}
+		},
+		mounted() {
 		}
 	}
 </script>
 <style scoped lang="scss">
 	.container {
-		display: flex;
-		flex-direction: column;
-		width: 100%;
-		height: 100%;
-		.viewContent {
-			flex: 1;
-			overflow: auto;
-		}
-		.tabContainer {
-			
-		}
 	}
 </style>

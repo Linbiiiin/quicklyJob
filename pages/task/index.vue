@@ -5,44 +5,48 @@
 			<view class="header">
 				<view class="posName">厦门·软件园</view>
 				<view class="searchContainer">
-					<uni-search-bar radius="20" placeholder="输入框" bgColor="#fff" @confirm="search" />
+					<wd-search hide-cancel />
 				</view>
 			</view>
 			<!-- <view class="fastMenu"></view> -->
 		</view>
-		<view class="subHeader">
-			<div class="title">
-				<uni-title type="h4" title="精选兼职" color="#000"></uni-title>
-			</div>
-			<div class="fastFilter">
-				<selector :options="fastFilter" size="normal" />
-				<uni-tag class="filter" text="筛选" size="normal" @click="openFilterPopup" />
-			</div>
-		</view>
+		<wd-sticky :offset-top="-50">
+			<view class="subHeader">
+				<text class="title">
+					精选推荐
+				</text>
+				<view class="fastFilter">
+					<wd-tag v-for="tag in fastFilterOptions" :custom-class="activeFastFilter !== tag.value ? 'fast-tag': 'fast-tag-active'" text="筛选" size="normal" @click="onChangeFastFilter(tag)">{{tag.label}}</wd-tag>
+					<wd-tag custom-class="filter-tag" text="筛选" size="normal" @click="openFilterPopup">
+						筛选
+					</wd-tag>
+				</view>
+			</view>
+		</wd-sticky>
 		<view class="listContainer">
 			<uni-list :border="false">
-				 <uni-list-item v-for="(item, index) in listData" class="uni-radius-lg task-item" direction="column">
+				<uni-list-item v-for="(item, index) in listData" class="uni-radius-lg task-item" direction="column">
 					<template v-slot:header>
 						<view class="card-desc">{{item.desc}}</view>
 						<view class="card-header">
-							<div class="shop-name uni-h4">{{item.title}}</div>
-							<div class="commission uni-h4">{{item.commission}}{{item.unit}}</div>
+							<div class="shop-name">{{item.title}}</div>
+							<div class="commission">{{item.commission}}{{item.unit}}</div>
 						</view>
 					</template>
 					<template v-slot:body>
 						<view class="card-body">
 							<view class="card-tag">
-								<uni-tag text="标签" size="mini" />
-								<uni-tag text="标签" size="mini" />
-								<uni-tag text="标签" size="mini" />
-								<uni-tag text="标签" size="mini" />
+								<wd-tag custom-class="task-tag" size="small">标签</wd-tag>
+								<wd-tag custom-class="task-tag" size="small">标签</wd-tag>
+								<wd-tag custom-class="task-tag" size="small">标签</wd-tag>
+								<wd-tag custom-class="task-tag" size="small">标签</wd-tag>
 							</view>
 							<view class="shop-pos"></view>
 						</view>
 					</template>
 					<template v-slot:footer>
 						<view class="card-footer">
-							<button size="mini">接单</button>
+							<wd-button size="small" plain @click="onClickTask(item)">接单</wd-button>
 						</view>
 					</template>
 				</uni-list-item>
@@ -59,9 +63,8 @@
 <script steup>
 	function genData(num) {
 		const result = [];
-		
+
 		for (let i = 0; i < num; i++) {
-			console.log(i)
 			result.push({
 				id: i + 1,
 				desc: '测试小标题',
@@ -71,28 +74,30 @@
 				unit: '元/小时'
 			});
 		}
-		
+
 		return result;
 	}
-	
+	const FAST_FILTER_OPTIONS = [
+		{
+			label: '推荐',
+			value: '0'
+		},
+		{
+			label: '附近',
+			value: '1'
+		},
+		{
+			label: '最新',
+				value: '2'
+		}
+	];
+
 	export default {
 		data() {
 			return {
 				listData: genData(100),
-				fastFilter: [
-					{
-						label: '推荐',
-						value: '0'
-					},
-					{
-						label: '附近',
-						value: '1'
-					},
-					{
-						label: '最新',
-						value: '2'
-					}
-				]
+				fastFilterOptions: FAST_FILTER_OPTIONS,
+				activeFastFilter: FAST_FILTER_OPTIONS[0].value,
 			}
 		},
 		methods: {
@@ -103,118 +108,167 @@
 				// open 方法传入参数 等同在 uni-popup 组件上绑定 type属性
 				this.$refs.filterPopup.open('bottom')
 			},
+			onChangeFastFilter(e) {
+				this.activeFastFilter = e.value;
+			},
+			onClickTask(e) {
+				console.log(e);
+				uni.navigateTo({
+					url: '/pages/taskDetail/index',
+					animationType: 'pop-in',
+				})
+			}
 		}
 	}
 </script>
 
-<style  lang="scss">
-.spaceBar {
-	width: 100%;
-	height: var(--status-bar-height);
-}
-.mainContainer {
-	width: 100%;
-}
-.headerContainer {
-}
-.listContainer {
-	padding: 20rpx 20rpx 100rpx 20rpx;
-	box-sizing: border-box;
-	.uni-list {
-		background-color: unset;
-		.task-item {
-			margin-bottom: 20rpx;
-		}
+<style lang="scss">
+	.spaceBar {
+		width: 100%;
+		height: var(--status-bar-height);
 	}
-}
-.card-footer {
-	
-}
-.header {
-	display: flex;
-	align-items: center;
-	padding: 0 20rpx;
-}
-.searchContainer {
-	flex: 1;
-}
-.subHeader {
-	position: sticky;
-	left: 0;
-	top: -1px;
-	z-index: 99;
-	display: flex;
-	align-items: center;
-	padding: 0 30rpx;
-	border-radius: 40rpx 40rpx 0 0;
-	background-color: #fff;
-}
-.title {
-	margin-right: 60rpx;
-}
-.fastFilter {
-	flex: 1;
-	display: flex;
-	justify-content: flex-end;
-	.filter {
-		
-		color: $uni-primary;
-		border: none;
-		background-color: $uni-primary-light;
-		&::after {
-			content: '';
-			display: inline-block;
-			margin-left: 10rpx;
-			margin-bottom: -2rpx;;
-			width: 0;
-			height: 0;
-			border-style: solid;
-			border-width: 3px;
-			border-color: transparent $uni-primary $uni-primary transparent;
-		}
-	}
-}
-.card-desc {
-	font-size: 24rpx;
-	color: $uni-extra-color;
-}
-.card-header {
-	display: flex;
-	margin-top: 20rpx;
-}
-.card-header {
-	.shop-name {
-		flex: 1;
-		margin-right: 30rpx;
-		font-weight: 700;
-		color: $uni-main-color;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-	.commission {
-		color: rgba(245, 54, 54, 1);
-	}
-}
-.card-body {
-	> .card-tag {
-		margin: 20rpx 0;
-		> * {
-			margin-right: 20rpx;
-		}
-	}
-}
-.card-footer {
-	display: flex;
-	justify-content: flex-end;
-	button {
-		margin: 0;
-		color: $uni-primary;
-		background-color: $uni-primary-light;
-		&::after {
-			border: none;
-		}
-	}
-}
 
+	.mainContainer {
+		width: 100%;
+	}
+
+	.headerContainer {}
+
+	.listContainer {
+		padding: 10px 10px 50px 10px;
+		box-sizing: border-box;
+
+		.uni-list {
+			background-color: unset;
+
+			.task-item {
+				margin-bottom: 10px;
+			}
+		}
+	}
+
+	.card-footer {}
+
+	.header {
+		display: flex;
+		align-items: center;
+		height: 50px;
+		padding: 0 10px;
+		background-color: #fff;
+
+		.searchContainer {
+			flex: 1;
+
+			.wd-search {
+				background: unset !important;
+			}
+		}
+	}
+
+	.subHeader {
+		// position: sticky;
+		// left: 0;
+		// top: -1px;
+		// z-index: 99;
+		width: 100vw;
+		display: flex;
+		align-items: center;
+		padding: 10px 15px;
+		overflow: hidden;
+		box-sizing: border-box;
+		background-color: #fff;		
+		.title {
+			margin-right: 30px;
+		}
+		
+		.fastFilter {
+			flex: 1;
+			display: flex;
+			justify-content: flex-end;
+			.fast-tag {
+				margin-right: 10px;
+			}
+			.fast-tag-active {
+				margin-right: 10px;
+				color: var(--primary-color) !important;
+				background: #d1e3f7 !important;
+			}
+			.filter-tag {
+				padding: 3px 5px;
+				color: var(--primary-color) !important;
+				background: #d1e3f7 !important;
+				&::after {
+					content: '';
+					display: inline-block;
+					margin-left: 5px;
+					margin-bottom: -1px;
+					;
+					width: 0;
+					height: 0;
+					border-style: solid;
+					border-width: 3px;
+					border-color: transparent var(--primary-color) var(--primary-color) transparent;
+				}
+			}
+		}
+	}
+	
+	.task-tag {
+		padding: 3px 5px !important;
+		color: rgba(0,0,0,0.65) !important;
+		background: #ededed !important;
+	}
+
+	.card-desc {
+		font-size: 12px;
+		// color: $uni-extra-color;
+	}
+
+	.card-header {
+		display: flex;
+		margin-top: 10px;
+	}
+
+	.card-header {
+		.shop-name {
+			flex: 1;
+			margin-right: 15px;
+			font-weight: 700;
+			font-size: 18px;
+			// color: $uni-main-color;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.commission {
+			font-size: 18px;
+			color: rgba(245, 54, 54, 1);
+		}
+	}
+
+	.card-body {
+		.card-tag {
+			margin: 10px 0;
+
+			.wd-tag {
+				margin-right: 10px;
+			}
+		}
+	}
+
+	.card-footer {
+		display: flex;
+		justify-content: flex-end;
+
+		button {
+			margin: 0;
+
+			// color: $uni-primary;
+			// background-color: $uni-primary-light;
+			&::after {
+				border: none;
+			}
+		}
+	}
 </style>
